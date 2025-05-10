@@ -179,6 +179,16 @@
                 isValid = false;
             }
 
+            // *********** Validate Phone ***********
+            // Phone Pattern: only 11 , digits only , only start with 012,010,015,011
+            const phonePattern = /^(010|011|012|015)\d{8}$/;     
+            if (phone && !phonePattern.test(phone)) 
+            {
+                document.getElementById('phoneError').textContent = 'Invalid phone number';
+                document.getElementById('phoneError').style.display = 'block';
+                isValid = false;
+            }
+
             if (isValid) {
                 // Initialize Loyality Points = 0 at Registeration
                 var LoyalityPoints = 0;
