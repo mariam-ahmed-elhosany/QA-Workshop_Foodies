@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Foodies Checkout</title>
+  <link rel="stylesheet" href="Checkout.css" />
+</head>
+<body>
+  <div class="header">
+    <h1>Foodies</h1>
+    <button id="loyaltyBtn">Loyalty Points</button>
+  </div>
+
+  <div class="checkout-container">
+    <div class="checkout-left">
+      <h2>Checkout</h2>
+      <table>
+        <thead>
+          <tr><th>Items</th><th>Quantity</th><th>Price</th></tr>
+        </thead>
+        <tbody id="itemsTable">
+          <!-- Dynamic rows here -->
+        </tbody>
+      </table>
+
+      <div class="offers-label">OFFERS</div>
+
+      <div class="totals">
+        <p>Items Total: <span id="totalAmount">EGP 0</span></p>
+        <p>After Offer: <span id="afterOffer">EGP 0</span></p>
+        <p>After Promo: <span id="afterPromo">EGP 0</span></p>
+        <p>After 10% Off: <span id="afterLoyalty">EGP 0</span></p>
+      </div>      
+    </div>
+
+    <div class="checkout-right">
+      <h2>Address</h2>
+      <input type="text" id="address" placeholder="Please enter your address" />
+
+      <div class="input-row">
+        <input type="text" id="promoCode" placeholder="Promocode (Try FOOD20)" />
+        <button id="promoBtn">Apply</button>
+      </div>
+      
+      <div class="input-row">
+        <input type="text" id="loyaltyPointsField" disabled placeholder="Get 10% off from loyalty points" />
+        <button id="applyLoyaltyBtn">Apply</button> <!-- Changed ID -->
+      </div>                   
+
+      <div class="action-buttons">
+        <button onclick="cancelOrder()">Cancel</button>
+        <button onclick="confirmOrder()">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="Checkout.js"></script>
+</body>
+</html>

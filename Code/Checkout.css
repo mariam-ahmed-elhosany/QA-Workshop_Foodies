@@ -1,0 +1,142 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background-color: #fff;
+  }
+  
+  .header {
+    background-color: #ddd;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 30px;
+  }
+  
+  .checkout-container {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+  }
+  
+  .checkout-left, .checkout-right {
+    width: 48%;
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+  }
+  
+  th, td {
+    text-align: left;
+    padding: 8px;
+    border-bottom: 1px solid #ccc;
+  }
+  
+  .offers-label {
+    background-color: #7bc043;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+    padding: 10px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+    font-size: 16px;
+  }
+  
+  input {
+    width: calc(100% - 10px);
+    padding: 8px;
+    margin: 8px 0;
+    box-sizing: border-box;
+  }
+  
+  button {
+    padding: 8px 12px;
+    margin: 8px 4px 0 0;
+    background-color: black;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .action-buttons {
+    margin-top: 20px;
+  }
+
+  .input-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 12px 0;
+  }
+  
+  .input-row input {
+    flex: 1;
+    height: 40px;
+    padding: 0 12px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 2px;
+    box-sizing: border-box;
+    margin: 0;
+    appearance: none;
+  }
+  
+  .apply-btn {
+    height: 40px;
+    width: 80px;
+    font-size: 14px;
+    border: none;
+    border-radius: 2px;
+    background-color: black;
+    color: white;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    margin-top: -2px;
+  }
+  
+
+  .checkout-right input:not(.no-style) {
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+  }
+  
+  /* Offer, promo, and loyalty breakdown styling */
+.totals {
+  margin-top: 20px;
+  border-top: 1px solid #ccc;
+  padding-top: 10px;
+}
+
+.totals p {
+  font-size: 16px;
+  margin: 8px 0;
+  font-weight: bold;
+}
+
+.totals span {
+  float: right;
+}
+
+#afterOffer {
+  color: #7bc043; /* green to match offer theme */
+}
+
+#afterPromo {
+  color: #f4a261; /* orange for promo */
+}
+
+#afterLoyalty {
+  color: #2a9d8f; /* teal for loyalty */
+}
+
+  

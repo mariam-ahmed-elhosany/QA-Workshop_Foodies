@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Restaurant Page</title>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
+    import { getFirestore, doc, getDoc, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAvgJ3w5nzFbx4QTWwN70s9_5Lo08fjfyg",
+      authDomain: "foodieshomepage.firebaseapp.com",
+      projectId: "foodieshomepage",
+      storageBucket: "foodieshomepage.appspot.com",
+      messagingSenderId: "845229655466",
+      appId: "1:845229655466:web:d99eae57b29190927cd7d3",
+      measurementId: "G-YQ93RVWZDJ"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const restaurantId = urlParams.get('restaurantId');
+
+    if (!restaurantId) {
+      alert("No restaurant selected!");
+    } else {
+      loadRestaurant(restaurantId);
+    }
+
+    async function loadRestaurant(id) {
+      const docRef = doc(db, "restaurants", id);
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+
+        document.querySelector('h1').textContent = data.name || "Unknown Restaurant";
+        document.querySelector('header').style.backgroundImage = `url(${data.imageURL || ""})`;
+
+        const foodList = document.querySelector('.food-list');
+        foodList.innerHTML = ''; 
+
+        // 🟢 Loop through items array
+        (data.items || []).forEach(item => {
+          const row = document.createElement('div');
+          row.className = 'food-row';
+          row.innerHTML = `
+            <div class="food-name">${item.name}</div>
+            <div class="food-price">EGP ${item.price.toFixed(2)}</div>
+            <div class="quantity-label">Quantity</div>
+            <div class="quantity-input"><input type="number" min="0" max="50" value="0" /></div>
+          `;
+          foodList.appendChild(row);
+        });
+
+        setupValidation(); 
+      } else {
+        alert("Restaurant not found!");
+      }
+    }
+
+    function setupValidation() {
+      const quantityInputs = document.querySelectorAll('input[type="number"]');
+      const checkoutBtn = document.getElementById('checkoutBtn');
+
+      function validateInput(input) {
+        const val = parseInt(input.value);
+        if (isNaN(val) || val < 0 || val > 50) {
+          input.value = '';
+        }
+      }
+
+      function checkQuantities() {
+        let hasValid = false;
+        quantityInputs.forEach(input => {
+          validateInput(input);
+          const val = parseInt(input.value);
+          if (!isNaN(val) && val > 0) {
+            hasValid = true;
+          }
+        });
+        checkoutBtn.disabled = !hasValid;
+      }
+
+      quantityInputs.forEach(input => {
+        input.addEventListener('input', () => {
+          validateInput(input);
+          checkQuantities();
+        });
+        input.addEventListener('blur', () => {
+          validateInput(input);
+          checkQuantities();
+        });
+      });
+
+     checkoutBtn.addEventListener("click", () => {
+  const items = Array.from(document.querySelectorAll(".food-row"));
+  const order = [];
+
+  items.forEach(row => {
+    const name = row.querySelector(".food-name").textContent.trim();
+    const price = parseFloat(row.querySelector(".food-price").textContent.replace("EGP ", ""));
+    const quantity = parseInt(row.querySelector("input").value);
+
+    if (!isNaN(quantity) && quantity > 0) {
+      order.push({ name, price, quantity });
+    }
+  });
+
+  if (order.length > 0) {
+    sessionStorage.setItem("selectedItems", JSON.stringify(order));
+    sessionStorage.setItem("restaurantId", restaurantId);
+    window.location.href = "Checkout.html";
+  } else {
+    alert("Please select at least one item to proceed.");
+  }
+});
+
+
+    }
+
+  </script>
+
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+    header { background-color: #666; color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; background-size: cover; background-position: center; }
+    .brand { font-size: 24px; font-weight: bold; }
+    .top-right { display: flex; align-items: center; gap: 10px; }
+    .search-container { display: flex; align-items: center; background-color: white; border-radius: 4px; padding: 2px 5px; }
+    .search-container input { border: none; outline: none; padding: 5px; width: 150px; }
+    .loyalty-btn { background-color: black; color: white; padding: 5px 10px; border: none; border-radius: 4px; font-size: 12px; font-weight: bold; }
+    .container { padding: 20px 40px; background-color: rgba(255, 255, 255, 0.9); }
+    h1 { font-size: 32px; margin-bottom: 5px; }
+    .food-list { margin-top: 30px; }
+    .food-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; }
+    .food-name { flex: 2; font-weight: bold; }
+    .food-price { flex: 1; font-weight: bold; }
+    .quantity-label { flex: 1; font-weight: bold; }
+    .quantity-input { flex: 1; }
+    .quantity-input input { width: 80%; padding: 5px; font-size: 16px; -moz-appearance: textfield; }
+    input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type=number] { -moz-appearance: textfield; }
+    .checkout { display: flex; justify-content: flex-end; margin-top: 40px; }
+    #checkoutBtn { background-color: #4CAF50; color: white; border: none; padding: 10px 20px; font-size: 16px; border-radius: 8px; cursor: pointer; }
+    #checkoutBtn:disabled { background-color: lightgray; cursor: not-allowed; }
+    hr { margin-top: 40px; }
+  </style>
+
+</head>
+
+<body>
+  <header>
+    <div class="brand">Foodies</div>
+    <div class="top-right">
+      <button class="loyalty-btn">Loyalty Points</button>
+      <div class="search-container">
+        <span>🔍</span>
+        <input type="text" placeholder="Search" />
+      </div>
+    </div>
+  </header>
+
+  <div class="container"> 
+    <h1>Loading...</h1>
+    <div class="food-list"></div>
+    <hr />
+    <div class="checkout">
+      <button id="checkoutBtn" disabled>Checkout</button>
+    </div>
+  </div>
+
+</body>
+</html>
