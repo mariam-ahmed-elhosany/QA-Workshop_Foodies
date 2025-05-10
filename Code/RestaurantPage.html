@@ -42,10 +42,41 @@
         document.querySelector('h1').textContent = data.name || "Unknown Restaurant";
         document.querySelector('header').style.backgroundImage = `url(${data.imageURL || ""})`;
 
-        const foodList = document.querySelector('.food-list');
-        foodList.innerHTML = ''; 
+        // Check for promo code in Firebase structure
+        // Handle both old structure (data.promoCode.id) and new structure (data.promoCode and data.amount)
+        let promoData = null;
+        
+        if (data.promoCode && typeof data.promoCode === 'object' && data.promoCode.id) {
+          // Old structure where promoCode is an object
+          promoData = data.promoCode;
+        } else if (data.promoCode && data.amount) {
+          // New structure where promoCode and amount are separate fields
+          promoData = {
+            id: data.promoCode,
+            value: parseInt(data.amount) || 0
+          };
+        }
+        
+        // Show promo code bar and save to sessionStorage if promo exists
+        if (promoData && promoData.id) {
+          const promoBar = document.createElement("div");
+          promoBar.className = "promo-bar";
+          promoBar.textContent = `Promo Code: ${promoData.id}`;
+          document.querySelector('.container').insertBefore(promoBar, document.querySelector('.food-list'));
 
-        // 🟢 Loop through items array
+          // Add restaurant ID to promo data
+          promoData.restaurantId = id;
+          
+          // Save promo info in sessionStorage
+          sessionStorage.setItem("promoCode", JSON.stringify(promoData));
+          console.log("Stored promo data:", promoData);
+        } else {
+          sessionStorage.removeItem("promoCode");
+        }
+
+        const foodList = document.querySelector('.food-list');
+        foodList.innerHTML = '';
+
         (data.items || []).forEach(item => {
           const row = document.createElement('div');
           row.className = 'food-row';
@@ -98,32 +129,29 @@
         });
       });
 
-     checkoutBtn.addEventListener("click", () => {
-  const items = Array.from(document.querySelectorAll(".food-row"));
-  const order = [];
+      checkoutBtn.addEventListener("click", () => {
+        const items = Array.from(document.querySelectorAll(".food-row"));
+        const order = [];
 
-  items.forEach(row => {
-    const name = row.querySelector(".food-name").textContent.trim();
-    const price = parseFloat(row.querySelector(".food-price").textContent.replace("EGP ", ""));
-    const quantity = parseInt(row.querySelector("input").value);
+        items.forEach(row => {
+          const name = row.querySelector(".food-name").textContent.trim();
+          const price = parseFloat(row.querySelector(".food-price").textContent.replace("EGP ", ""));
+          const quantity = parseInt(row.querySelector("input").value);
 
-    if (!isNaN(quantity) && quantity > 0) {
-      order.push({ name, price, quantity });
+          if (!isNaN(quantity) && quantity > 0) {
+            order.push({ name, price, quantity });
+          }
+        });
+
+        if (order.length > 0) {
+          sessionStorage.setItem("selectedItems", JSON.stringify(order));
+          sessionStorage.setItem("restaurantId", restaurantId);
+          window.location.href = "Checkout.html";
+        } else {
+          alert("Please select at least one item to proceed.");
+        }
+      });
     }
-  });
-
-  if (order.length > 0) {
-    sessionStorage.setItem("selectedItems", JSON.stringify(order));
-    sessionStorage.setItem("restaurantId", restaurantId);
-    window.location.href = "Checkout.html";
-  } else {
-    alert("Please select at least one item to proceed.");
-  }
-});
-
-
-    }
-
   </script>
 
   <style>
@@ -136,6 +164,18 @@
     .loyalty-btn { background-color: black; color: white; padding: 5px 10px; border: none; border-radius: 4px; font-size: 12px; font-weight: bold; }
     .container { padding: 20px 40px; background-color: rgba(255, 255, 255, 0.9); }
     h1 { font-size: 32px; margin-bottom: 5px; }
+
+    .promo-bar {
+      font-weight: bold;
+      color: white;
+      background-color: #4CAF50;
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      text-align: center;
+      font-size: 18px;
+    }
+
     .food-list { margin-top: 30px; }
     .food-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; }
     .food-name { flex: 2; font-weight: bold; }
@@ -150,7 +190,6 @@
     #checkoutBtn:disabled { background-color: lightgray; cursor: not-allowed; }
     hr { margin-top: 40px; }
   </style>
-
 </head>
 
 <body>
@@ -173,6 +212,5 @@
       <button id="checkoutBtn" disabled>Checkout</button>
     </div>
   </div>
-
 </body>
 </html>
