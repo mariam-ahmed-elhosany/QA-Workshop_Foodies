@@ -71,8 +71,13 @@ window.onload = () => {
   loadSelectedItems();
   displayItems();
   getItemsTotal();
-  applyOffer();
-  updateLoyaltyButton();
+  
+  // Important: First check for offer from offers collection
+  checkAndApplyOffer().then(() => {
+    // After offer is applied (or not), update loyalty button and check for promo
+    updateLoyaltyButton();
+    checkAndApplyRestaurantPromo();
+  });
 
   document.getElementById("promoBtn").addEventListener("click", afterPromo);
   document.getElementById("applyLoyaltyBtn").addEventListener("click", afterLoyalty);
@@ -80,6 +85,129 @@ window.onload = () => {
 
 window.confirmOrder = confirmOrder;
 window.cancelOrder = cancelOrder;
+
+// New function to check and apply offer from offers collection
+async function checkAndApplyOffer() {
+  try {
+    // Check if user came from an offer
+    const fromOffer = sessionStorage.getItem("fromOffer");
+    const restaurantId = sessionStorage.getItem("restaurantId");
+    
+    if (fromOffer === "true" && restaurantId) {
+      console.log("User came from offers section, loading offer for restaurant:", restaurantId);
+      
+      // Get the offer from Firebase
+      const offersRef = doc(db, "offers", restaurantId);
+      const offerSnap = await getDoc(offersRef);
+      
+      if (offerSnap.exists()) {
+        const offerData = offerSnap.data();
+        console.log("Found offer data:", offerData);
+        
+        // Get discount amount
+        let discount = 0;
+        if (offerData.discount) {
+          discount = parseInt(offerData.discount);
+        } else if (offerData.amount) {
+          discount = parseInt(offerData.amount);
+        } else if (offerData.value) {
+          discount = parseInt(offerData.value);
+        }
+        
+        if (discount > 0) {
+          console.log("Applying offer discount:", discount);
+          
+          // Apply the offer to the base price
+          const total = getItemsTotal();
+          basePriceAfterOffer = Math.max(0, total - discount);
+          
+          // Update UI
+          const afterOfferElement = document.getElementById("afterOffer");
+          if (afterOfferElement) {
+            afterOfferElement.innerText = `EGP ${basePriceAfterOffer.toFixed(2)}`;
+          }
+          
+          // Add a visual indicator that an offer was applied
+          const offerInfoElement = document.getElementById("offerInfo");
+          if (offerInfoElement) {
+            offerInfoElement.innerHTML = `<span class="offer-applied">Offer applied: EGP ${discount} off!</span>`;
+          }
+          
+          return true;
+        }
+      } else {
+        console.log("No offer found for this restaurant");
+      }
+    } else {
+      console.log("User did not come from offers section or no restaurant ID");
+    }
+    
+    // If no offer found or not coming from offers, apply the default offer
+    applyDefaultOffer();
+    return false;
+  } catch (e) {
+    console.error("Error applying offer from collection:", e);
+    // Fallback to default offer if any error occurs
+    applyDefaultOffer();
+    return false;
+  }
+}
+
+// Default offer (moved from applyOffer function)
+function applyDefaultOffer() {
+  const total = getItemsTotal();
+  const offer = 100; // Default fixed offer
+  basePriceAfterOffer = Math.max(0, total - offer);
+  
+  const afterOfferElement = document.getElementById("afterOffer");
+  if (afterOfferElement) {
+    afterOfferElement.innerText = `EGP ${basePriceAfterOffer.toFixed(2)}`;
+  }
+  
+  const offerInfoElement = document.getElementById("offerInfo");
+  if (offerInfoElement) {
+    offerInfoElement.innerHTML = `<span class="offer-applied">Default offer applied: EGP ${offer} off!</span>`;
+  }
+  
+  const afterPromoElement = document.getElementById("afterPromo");
+  if (afterPromoElement) {
+    afterPromoElement.innerText = "EGP 0";
+  }
+  
+  const afterLoyaltyElement = document.getElementById("afterLoyalty");
+  if (afterLoyaltyElement) {
+    afterLoyaltyElement.innerText = "EGP 0";
+  }
+  
+  isPromoApplied = false;
+  isLoyaltyApplied = false;
+}
+
+// New function to auto-fill restaurant promo code (but not apply it)
+function checkAndApplyRestaurantPromo() {
+  try {
+    const promoData = sessionStorage.getItem("promoCode");
+    if (promoData) {
+      const promo = JSON.parse(promoData);
+      console.log("Found restaurant promo:", promo);
+      
+      if (promo && promo.id) {
+        // Set the promo code in the input field
+        const promoInput = document.getElementById("promoCode");
+        if (promoInput) {
+          promoInput.value = promo.id;
+          console.log("Auto-filled promo code:", promo.id);
+          
+          // No auto-apply, wait for user to click the Apply button
+        }
+      }
+    } else {
+      console.log("No restaurant promo found");
+    }
+  } catch (e) {
+    console.error("Error auto-filling restaurant promo:", e);
+  }
+}
 
 // Load selected items - Fixed version
 function loadSelectedItems() {
@@ -150,32 +278,7 @@ function getItemsTotal() {
   return total;
 }
 
-// Offer: Fixed 100 EGP
-function applyOffer() {
-  const total = getItemsTotal();
-  const offer = 100;
-  basePriceAfterOffer = Math.max(0, total - offer);
-  
-  const afterOfferElement = document.getElementById("afterOffer");
-  if (afterOfferElement) {
-    afterOfferElement.innerText = `EGP ${basePriceAfterOffer.toFixed(2)}`;
-  }
-  
-  const afterPromoElement = document.getElementById("afterPromo");
-  if (afterPromoElement) {
-    afterPromoElement.innerText = "EGP 0";
-  }
-  
-  const afterLoyaltyElement = document.getElementById("afterLoyalty");
-  if (afterLoyaltyElement) {
-    afterLoyaltyElement.innerText = "EGP 0";
-  }
-  
-  isPromoApplied = false;
-  isLoyaltyApplied = false;
-}
-
-// Promo Code
+// Promo Code - Updated to handle restaurant promos
 function afterPromo() {
   const promoCodeElement = document.getElementById("promoCode");
   if (!promoCodeElement) {
@@ -184,20 +287,50 @@ function afterPromo() {
   }
   
   const code = promoCodeElement.value.trim().toUpperCase();
-  const validCodes = { "FOOD50": 50 };
-  
-  if (!code || !validCodes[code]) {
-    alert("Invalid promo code. Try 'FOOD50'.");
-    isPromoApplied = false;
-    
-    const afterPromoElement = document.getElementById("afterPromo");
-    if (afterPromoElement) {
-      afterPromoElement.innerText = `EGP ${basePriceAfterOffer.toFixed(2)}`;
-    }
+  if (!code) {
+    alert("Please enter a promo code");
     return;
   }
+  
+  // Check first in restaurant promo from sessionStorage
+  let discount = 0;
+  try {
+    const promoData = sessionStorage.getItem("promoCode");
+    if (promoData) {
+      const promo = JSON.parse(promoData);
+      if (promo && promo.id && promo.id.toUpperCase() === code) {
+        // Make sure we have a valid discount value
+        if (promo.value) {
+          // Handle both number and string formats
+          discount = parseInt(promo.value);
+        } else if (promo.amount) {
+          // For backward compatibility
+          discount = parseInt(promo.amount);
+        }
+        
+        console.log("Using restaurant promo discount:", discount);
+      }
+    }
+  } catch (e) {
+    console.error("Error parsing restaurant promo:", e);
+  }
+  
+  // If not found in restaurant promo, check hardcoded values
+  if (discount === 0) {
+    const validCodes = { "FOOD50": 50, "BURGER30": 30 };
+    if (!validCodes[code]) {
+      alert("Invalid promo code. Try 'FOOD50' or a restaurant-specific code.");
+      isPromoApplied = false;
+      
+      const afterPromoElement = document.getElementById("afterPromo");
+      if (afterPromoElement) {
+        afterPromoElement.innerText = `EGP ${basePriceAfterOffer.toFixed(2)}`;
+      }
+      return;
+    }
+    discount = validCodes[code];
+  }
 
-  const discount = validCodes[code];
   const discounted = Math.max(0, basePriceAfterOffer - discount);
   isPromoApplied = true;
   
@@ -315,6 +448,7 @@ async function confirmOrder() {
       address,
       promoCode: isPromoApplied ? document.getElementById("promoCode").value.trim().toUpperCase() : null,
       loyaltyPointsUsed: isLoyaltyApplied ? requiredLoyaltyPoints : 0,
+      fromOffer: sessionStorage.getItem("fromOffer") === "true",
       status: "pending",
       timestamp: serverTimestamp(),
       userEmail: user.email || null
@@ -374,6 +508,8 @@ async function confirmOrder() {
     // Clear cart and redirect
     sessionStorage.removeItem("selectedItems");
     sessionStorage.removeItem("restaurantOffer");
+    sessionStorage.removeItem("promoCode");
+    sessionStorage.removeItem("fromOffer");
     window.location.href = "foodies-html.html";
   } catch (err) {
     console.error("Order failed with detailed error:", err);
@@ -393,6 +529,8 @@ async function confirmOrder() {
 function cancelOrder() {
   if (confirm("Are you sure to cancel?")) {
     sessionStorage.removeItem("selectedItems");
+    sessionStorage.removeItem("promoCode");
+    sessionStorage.removeItem("fromOffer");
     window.location.href = "foodies-html.html";
   }
 }

@@ -25,6 +25,9 @@
       </table>
 
       <div class="offers-label">OFFERS</div>
+      
+      <!-- Added offer info section -->
+      <div id="offerInfo"></div>
 
       <div class="totals">
         <p>Items Total: <span id="totalAmount">EGP 0</span></p>
@@ -36,16 +39,16 @@
 
     <div class="checkout-right">
       <h2>Address</h2>
-      <input type="text" id="address" placeholder="Please enter your address" />
+      <input type="text" id="address" placeholder="Please enter your address" required />
 
       <div class="input-row">
-        <input type="text" id="promoCode" placeholder="Promocode (Try FOOD20)" />
-        <button id="promoBtn">Apply</button>
+        <input type="text" id="promoCode" placeholder="Promocode (Try FOOD50)" />
+        <button class="apply-btn" id="promoBtn">Apply</button>
       </div>
       
       <div class="input-row">
-        <input type="text" id="loyaltyPointsField" disabled placeholder="Get 10% off from loyalty points" />
-        <button id="applyLoyaltyBtn">Apply</button> <!-- Changed ID -->
+        <input type="text" id="loyaltyPointsField" class="no-style" readonly placeholder="Get 10% off from loyalty points" />
+        <button class="apply-btn" id="applyLoyaltyBtn">Apply</button>
       </div>                   
 
       <div class="action-buttons">
