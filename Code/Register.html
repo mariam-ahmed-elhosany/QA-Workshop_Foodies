@@ -161,20 +161,42 @@
                 isValid = false;
             }
 
-            if (!email || !/\S+@\S+\.\S+/.test(email)) {
-                document.getElementById('emailError').textContent = 'Invalid email address';
+            // *********** Validate email ***********
+            if (!email) 
+            {
+                document.getElementById('emailError').textContent = 'Invalid Email Format';
+                document.getElementById('emailError').style.display = 'block';
+                isValid = false;
+            } 
+            else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) 
+            {
+                document.getElementById('emailError').textContent = 'Invalid Email Format';
                 document.getElementById('emailError').style.display = 'block';
                 isValid = false;
             }
 
-            if (!password || password.length < 6) {
-                document.getElementById('passwordError').textContent = 'Password must be at least 6 characters';
+            // *********** Validate Password ***********
+            // pattern: at least 1 uppercase, 1 lowercase, 1 special char , and one number
+            const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]{8,16}$/;
+
+            if (!password) 
+            {
+                document.getElementById('passwordError').textContent = 'Password should contain at least 1 uppercase, lowercase, special character and one number and the password length must be between 8 to 16 characters.';
+                document.getElementById('passwordError').style.display = 'block';
+                isValid = false;
+            } 
+            else if (!passwordPattern.test(password)) 
+            {
+                document.getElementById('passwordError').textContent = 'Password should contain at least 1 uppercase, lowercase, special character and one number and the password length must be between 8 to 16 characters.';
                 document.getElementById('passwordError').style.display = 'block';
                 isValid = false;
             }
 
-            if (password !== confirmPassword) {
-                document.getElementById('confirmPasswordError').textContent = 'Passwords do not match';
+            
+            // *********** Validate Confirm Password ***********
+            if (password !== confirmPassword) 
+            {
+                document.getElementById('confirmPasswordError').textContent = 'Passwords do not match. Please re-enter the same password';
                 document.getElementById('confirmPasswordError').style.display = 'block';
                 isValid = false;
             }
