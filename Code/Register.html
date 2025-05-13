@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Foodie - Sign Up</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Arial', sans-serif; }
+        body { display: flex; height: 100vh; overflow: hidden; }
+        .image-container { width: 35%; height: 100%; }
+        .image-container img { width: 100%; height: 100%; object-fit: cover; }
+        .content-container { width: 65%; padding: 40px; overflow-y: auto; background-color: #f8f8f8; }
+        h1 { color: #ff6b6b; font-size: 2.5rem; text-align: center; margin-bottom: 10px; }
+        .tagline { text-align: center; font-size: 1.2rem; color: #666; margin-bottom: 30px; }
+        hr { border: none; height: 1px; background-color: #ddd; margin: 20px 0; }
+        h2 { font-size: 1.8rem; margin-bottom: 20px; color: #444; }
+        .form-container { background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); max-width: 600px; margin: 0 auto; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #555; }
+        input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 1rem; transition: border 0.3s; }
+        input:focus { outline: none; border-color: #ff6b6b; }
+        .name-fields { display: flex; gap: 15px; }
+        .name-fields .form-group { flex: 1; }
+        button { background-color: #FF5C00; color: white; border: none; padding: 14px 20px; font-size: 1.1rem; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; transition: background-color 0.3s; }
+        button:hover { background-color: #ff5252; }
+        button:disabled { background-color: #ccc; color: #666; cursor: not-allowed; opacity: 0.6; }
+        .error { color: #ff5252; font-size: 0.9rem; margin-top: 5px; display: none; }
+        @media (max-width: 768px) { body { flex-direction: column; height: auto; } .image-container { width: 100%; height: 200px; } .content-container { width: 100%; padding: 20px; } }
+    </style>
+</head>
+<body>
+    <div class="image-container">
+        <img src="Login_Image.jpg" alt="Food image">
+    </div>
+    
+    <div class="content-container">
+        <hr>
+        
+        <div class="form-container">
+            <h2>Create your account</h2>
+            
+            <form id="signupForm" novalidate>
+                <div class="name-fields">
+                    <div class="form-group">
+                        <label for="firstName">First name</label>
+                        <input type="text" id="firstName" required>
+                        <div class="error" id="firstNameError"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="lastName">Last name</label>
+                        <input type="text" id="lastName" required>
+                        <div class="error" id="lastNameError"></div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" required>
+                    <div class="error" id="emailError"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required>
+                    <div class="error" id="passwordError"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <input type="password" id="confirmPassword" required>
+                    <div class="error" id="confirmPasswordError"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone">Phone number</label>
+                    <input type="tel" id="phone">
+                    <div class="error" id="phoneError"></div>
+                </div>
+                
+                <button type="submit">Sign up</button>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-auth.js";
+        import { getFirestore, setDoc, doc } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAvgJ3w5nzFbx4QTWwN70s9_5Lo08fjfyg",
+            authDomain: "foodieshomepage.firebaseapp.com",
+            projectId: "foodieshomepage",
+            storageBucket: "foodieshomepage.firebasestorage.app",
+            messagingSenderId: "845229655466",
+            appId: "1:845229655466:web:d99eae57b29190927cd7d3",
+            measurementId: "G-YQ93RVWZDJ"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth();
+        const db = getFirestore();
+
+        document.querySelector('button[type="submit"]').disabled = true;
+
+        const submitBtn = document.querySelector('button[type="submit"]');
+        const requiredFields = [
+            document.getElementById('firstName'),
+            document.getElementById('lastName'),
+            document.getElementById('email'),
+            document.getElementById('password'),
+            document.getElementById('confirmPassword'),
+            document.getElementById('phone')
+        ];
+
+        function checkFieldsNotEmpty() {
+            const allFilled = requiredFields.every(input => input.value.trim() !== '');
+            submitBtn.disabled = !allFilled;
+        }
+
+        requiredFields.forEach(input => {
+            input.addEventListener('input', checkFieldsNotEmpty);
+        });
+
+        document.getElementById('signupForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const errorElements = document.querySelectorAll('.error');
+            errorElements.forEach(el => {
+                el.style.display = 'none';
+                el.textContent = '';
+            });
+
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const phone = document.getElementById('phone').value;
+
+            let isValid = true;
+
+            if (!firstName || !/^[a-zA-Z]+$/.test(firstName)) {
+                document.getElementById('firstNameError').textContent = 'Invalid first name. Please enter a valid name (3-30 characters, alphabetic only)';
+                document.getElementById('firstNameError').style.display = 'block';
+                isValid = false;
+            } else if (firstName.length < 3 || firstName.length > 30) {
+                document.getElementById('firstNameError').textContent = 'Invalid first name. Please enter a valid name (3-30 characters, alphabetic only)';
+                document.getElementById('firstNameError').style.display = 'block';
+                isValid = false;
+            }
+
+            if (!lastName || !/^[a-zA-Z]+$/.test(lastName)) {
+                document.getElementById('lastNameError').textContent = 'Invalid last name. Please enter a valid name (3-30 characters, alphabetic only)';
+                document.getElementById('lastNameError').style.display = 'block';
+                isValid = false;
+            } else if (lastName.length < 3 || lastName.length > 30) {
+                document.getElementById('lastNameError').textContent = 'Invalid last name. Please enter a valid name (3-30 characters, alphabetic only)';
+                document.getElementById('lastNameError').style.display = 'block';
+                isValid = false;
+            }
+
+            // *********** Validate email ***********
+            if (!email) 
+            {
+                document.getElementById('emailError').textContent = 'Invalid Email Format';
+                document.getElementById('emailError').style.display = 'block';
+                isValid = false;
+            } 
+            else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) 
+            {
+                document.getElementById('emailError').textContent = 'Invalid Email Format';
+                document.getElementById('emailError').style.display = 'block';
+                isValid = false;
+            }
+
+            // *********** Validate Password ***********
+            // pattern: at least 1 uppercase, 1 lowercase, 1 special char , and one number
+            const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]{8,16}$/;
+
+            if (!password) 
+            {
+                document.getElementById('passwordError').textContent = 'Password should contain at least 1 uppercase, lowercase, special character and one number and the password length must be between 8 to 16 characters.';
+                document.getElementById('passwordError').style.display = 'block';
+                isValid = false;
+            } 
+            else if (!passwordPattern.test(password)) 
+            {
+                document.getElementById('passwordError').textContent = 'Password should contain at least 1 uppercase, lowercase, special character and one number and the password length must be between 8 to 16 characters.';
+                document.getElementById('passwordError').style.display = 'block';
+                isValid = false;
+            }
+
+            
+            // *********** Validate Confirm Password ***********
+            if (password !== confirmPassword) 
+            {
+                document.getElementById('confirmPasswordError').textContent = 'Passwords do not match. Please re-enter the same password';
+                document.getElementById('confirmPasswordError').style.display = 'block';
+                isValid = false;
+            }
+
+            // *********** Validate Phone ***********
+            // Phone Pattern: only 11 , digits only , only start with 012,010,015,011
+            const phonePattern = /^(010|011|012|015)\d{8}$/;     
+            if (phone && !phonePattern.test(phone)) 
+            {
+                document.getElementById('phoneError').textContent = 'Invalid phone number';
+                document.getElementById('phoneError').style.display = 'block';
+                isValid = false; 
+            }
+
+            if (isValid) {
+                // Initialize Loyality Points = 0 at Registeration
+                var LoyalityPoints = 0;
+                createUserWithEmailAndPassword(auth, email, password)
+  .then((userCredential) => {
+    const user = userCredential.user;
+    
+    localStorage.setItem("user", JSON.stringify({
+      uid: user.uid,
+      email: email,
+      firstName: firstName,
+      lastName: lastName
+    }));
+    
+    return setDoc(doc(db, "users", user.uid), {
+      firstName: firstName,
+      lastName: lastName,
+      email: email,
+      phone: phone,
+      LoyalityPoints: 0
+    });
+  })
+                    .then(() => {
+                        console.log("User data written to Firestore");
+                        alert('Account Created Successfully');
+                            
+                            setTimeout(() => {
+                            window.location.href = 'login2.html';  // Redirect to login page after a short delay
+                        }, 1000);  // 1 second delay
+                    })
+                    .catch((error) => {
+                        const errorCode = error.code;
+                        const errorMessage = error.message;
+                        console.error("Error: ", errorCode, errorMessage);
+                        
+                        // Showing Error Messages
+                        if(errorCode=='auth/email-already-in-use')
+                        {
+                            alert('Email Already Exists');
+                        }
+                        else
+                        {
+                           alert('unable to create User');
+                        }
+                    });
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Foodies - Restaurant Discovery</title>
+    <meta name="description" content="Discover great restaurants and exclusive offers with Foodies app">
+    <link rel="stylesheet" href="styles.css">
+    <!-- Implementation based on High and Low Level Design specifications -->
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">Foodies</div>
+            <div class="right-header">
+                <div class="loyalty-points">loyalty points</div>
+                <div class="search-bar">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" placeholder="Search...">
+                </div>
+            </div>
+        </header>
+        
+        <section class="offers-section">
+            <h2>Offers</h2>
+            <div class="carousel">
+                <button class="carousel-control carousel-prev">←</button>
+                <div class="carousel-inner">
+                    <div class="offer-card" data-restaurant-id="1">
+                        <img src="/api/placeholder/200/120" alt="Restaurant offer" class="offer-image">
+                        <div class="offer-title">Restaurant</div>
+                    </div>
+                    <div class="offer-card" data-restaurant-id="2">
+                        <img src="/api/placeholder/200/120" alt="Restaurant offer" class="offer-image">
+                        <div class="offer-title">Restaurant</div>
+                    </div>
+                    <div class="offer-card" data-restaurant-id="3">
+                        <img src="/api/placeholder/200/120" alt="Restaurant offer" class="offer-image">
+                        <div class="offer-title">Restaurant</div>
+                    </div>
+                    <div class="offer-card" data-restaurant-id="4">
+                        <img src="/api/placeholder/200/120" alt="Restaurant offer" class="offer-image">
+                        <div class="offer-title">Restaurant</div>
+                    </div>
+                    <div class="offer-card" data-restaurant-id="5">
+                        <img src="/api/placeholder/200/120" alt="Restaurant offer" class="offer-image">
+                        <div class="offer-title">Restaurant</div>
+                    </div>
+                    <div class="offer-card" data-restaurant-id="6">
+                        <img src="/api/placeholder/200/120" alt="Restaurant offer" class="offer-image">
+                        <div class="offer-title">Restaurant</div>
+                    </div>
+                </div>
+                <button class="carousel-control carousel-next">→</button>
+            </div>
+        </section>
+        
+        <section class="restaurants-section">
+            <h2>Restaurants</h2>
+            <div class="restaurant-item" data-restaurant-id="1">
+                <img src="/api/placeholder/120/80" alt="Restaurant" class="restaurant-image">
+                <div class="restaurant-name">Restaurant</div>
+            </div>
+            <div class="restaurant-item" data-restaurant-id="2">
+                <img src="/api/placeholder/120/80" alt="Restaurant" class="restaurant-image">
+                <div class="restaurant-name">Restaurant</div>
+            </div>
+            <div class="restaurant-item" data-restaurant-id="3">
+                <img src="/api/placeholder/120/80" alt="Restaurant" class="restaurant-image">
+                <div class="restaurant-name">Restaurant</div>
+            </div>
+            <div class="restaurant-item" data-restaurant-id="4">
+                <img src="/api/placeholder/120/80" alt="Restaurant" class="restaurant-image">
+                <div class="restaurant-name">Restaurant</div>
+            </div>
+        </section>
+    </div>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <script src="script.js"></script>
+    
+    
+</body>
+</html>

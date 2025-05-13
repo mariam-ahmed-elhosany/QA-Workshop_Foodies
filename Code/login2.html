@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Foodie Login</title>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; font-family:Arial,sans-serif }
+    body,html { height:100% }
+    .container { display:flex; height:100vh }
+    .left { flex:0 0 30%; background:url('Login_Image.jpg') center/cover no-repeat }
+    .right {
+      flex:1; background:#eddfc1; padding:60px 40px;
+      display:flex; flex-direction:column; justify-content:center;
+    }
+    h2 { margin:0 0 30px 30px; color:#333 }
+    form input, form select {
+      width:70%; padding:12px 15px; margin:10px 0 5px 30px;
+      border:1px solid #ccc; border-radius:5px;
+    }
+    .input-group { margin-bottom:10px }
+    button {
+      width:70%; padding:12px; margin:10px 0 0 30px;
+      background:#ff6600; color:#fff; border:none; border-radius:5px;
+      font-size:16px; cursor:pointer;
+    }
+    button:hover { background:#e65c00 }
+    .error { color:red; font-size:.9em; margin:5px 0 0 30px }
+    .success { color:green; font-size:.9em; margin:5px 0 0 30px }
+    .signup { margin:15px 0 0 30px; font-size:.9em }
+    .signup a { color:#ff6600; text-decoration:none }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="left"></div>
+    <div class="right">
+      <h2>Welcome Back!</h2>
+      <form id="loginForm" novalidate>
+        <div class="input-group">
+          <input type="email" id="email" placeholder="Enter your email" required>
+          <div id="emailError" class="error"></div>
+        </div>
+        <div class="input-group">
+          <input type="password" id="password" placeholder="Enter your password" required>
+          <div id="passwordError" class="error"></div>
+        </div>
+        <select id="zone" required>
+          <option value="">Select zone</option>
+          <option value="zone1">Zone 1</option>
+          <option value="zone2">Zone 2</option>
+          <option value="zone3">Zone 3</option>
+        </select>
+        <button type="submit">Login</button>
+        <div id="credentialsError" class="error"></div>
+      </form>
+      <p class="signup">Don’t have an account? <a href="#"  onclick="goToSignup()"  >Sign up</a></p>
+    </div>
+  </div>
+
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyAvgJ3w5nzFbx4QTWwN70s9_5Lo08fjfyg",
+      authDomain: "foodieshomepage.firebaseapp.com",
+      projectId: "foodieshomepage",
+      storageBucket: "foodieshomepage.firebasestorage.app",
+      messagingSenderId: "845229655466",
+      appId: "1:845229655466:web:d99eae57b29190927cd7d3",
+      measurementId: "G-YQ93RVWZDJ"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    document.getElementById('loginForm').addEventListener('submit', e => {
+      e.preventDefault();
+
+      const emailEl = document.getElementById('email');
+      const passEl  = document.getElementById('password');
+      const email   = emailEl.value.trim().toLowerCase();
+      const pass    = passEl.value.trim();
+      const zone    = document.getElementById('zone').value;
+
+      const emailErr= document.getElementById('emailError');
+      const passErr = document.getElementById('passwordError');
+      const credErr = document.getElementById('credentialsError');
+
+      emailErr.textContent = '';
+      passErr.textContent = '';
+      credErr.textContent = '';
+
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const passPattern  = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+
+      let ok = true;
+
+      if (!emailPattern.test(email)) {
+        emailErr.textContent = 'Invalid email format';
+        ok = false;
+      }
+
+      if (!passPattern.test(pass)) {
+        passErr.textContent = 'Password needs 8+ chars, upper, lower, number & special';
+        ok = false;
+      }
+
+      if (!zone) {
+        credErr.textContent = 'Please select a zone';
+        ok = false;
+      }
+
+      if (!ok) return;
+
+      // Firebase login
+      // auth.signInWithEmailAndPassword(email, pass)
+      //   .then(() => {
+      //     credErr.className = 'success';
+      //     credErr.textContent = 'Login successful!';
+      //     setTimeout(() => {
+      //       window.location.href = 'Checkout_Test.html'; // TESTING CHECKOUT (Should be the Home Page)
+      //     }, 1000);
+      //   })
+
+      /////////////////////////////////////////////////////////////////////////////////
+
+      // Firebase login
+      auth.signInWithEmailAndPassword(email, pass)
+.then((userCredential) => {
+  const user = userCredential.user;
+  localStorage.setItem("user", JSON.stringify({
+    uid: user.uid,
+    email: user.email,
+    // Add any other user data you need
+  }));
+  credErr.className = 'success';
+  credErr.textContent = 'Login successful!';
+  setTimeout(() => {
+    window.location.href = 'foodies-html.html';
+  }, 1000);
+})
+
+      /////////////////////////////////////////////////////////////////////////////////
+
+        .catch(error => {
+          credErr.className = 'error';
+          credErr.textContent = error.message;
+        });
+    });
+
+    // SignUp Button event ===> go to Registration Page
+    function goToSignup() 
+    {
+      window.location.href = "Register.html" ; // your target page
+    }
+
+
+  </script>
+</body>
+</html>
