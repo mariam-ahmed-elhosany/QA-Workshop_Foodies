@@ -498,7 +498,10 @@ async function confirmOrder() {
       updateLoyaltyButton();
       
       // Show success message with points info
-      alert(`Order placed successfully! You earned 100 loyalty points. Your new balance: ${currentPoints} points`);
+      alert(`Order placed Successfully!
+Thank you for your order. One of our team members will
+contact you shortly to confirm it.
+You will also be able to track your order using your order number.`);
     } catch (error) {
       console.error("Error updating loyalty points:", error);
       // Continue with order even if points update fails
@@ -527,13 +530,12 @@ async function confirmOrder() {
 
 // Cancel
 function cancelOrder() {
-  if (confirm("Are you sure to cancel?")) {
-    sessionStorage.removeItem("selectedItems");
-    sessionStorage.removeItem("promoCode");
-    sessionStorage.removeItem("fromOffer");
-    window.location.href = "foodies-html.html";
-  }
+  sessionStorage.removeItem("selectedItems");
+  sessionStorage.removeItem("promoCode");
+  sessionStorage.removeItem("fromOffer");
+  window.location.href = "foodies-html.html";
 }
+
 
 // Update loyalty display
 function updateLoyaltyButton() {
